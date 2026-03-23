@@ -1,0 +1,19 @@
+export default `<!DOCTYPE html><html lang="en" data-beasties-container><head>
+  <meta charset="utf-8">
+  <title>MiAppAngular</title>
+  <base href="/Programaci-n-y-Plataformas-Web-Clases/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+
+<link rel="stylesheet" href="/Programaci-n-y-Plataformas-Web-Clases/styles-5INURTSO.css"><style ng-app-id="ng">nav[_ngcontent-ng-c1030820267]{background-color:#159;padding:1rem;overflow:hidden}a[_ngcontent-ng-c1030820267]{color:#fff;text-decoration:none;margin-right:1rem;font-weight:700;display:inline-block;padding:0 .5rem}a.active[_ngcontent-ng-c1030820267]{color:#ff0;text-decoration:underline;background-color:#fff3}</style></head>
+<body><!--nghm--><script type="text/javascript" id="ng-event-dispatch-contract">(()=>{function p(t,n,r,o,e,i,f,m){return{eventType:t,event:n,targetElement:r,eic:o,timeStamp:e,eia:i,eirp:f,eiack:m}}function u(t){let n=[],r=e=>{n.push(e)};return{c:t,q:n,et:[],etc:[],d:r,h:e=>{r(p(e.type,e,e.target,t,Date.now()))}}}function s(t,n,r){for(let o=0;o<n.length;o++){let e=n[o];(r?t.etc:t.et).push(e),t.c.addEventListener(e,t.h,r)}}function c(t,n,r,o,e=window){let i=u(t);e._ejsas||(e._ejsas={}),e._ejsas[n]=i,s(i,r),s(i,o,!0)}window.__jsaction_bootstrap=c;})();
+</script><script>window.__jsaction_bootstrap(document.body,"ng",["click"],[]);</script>
+  <app-root ng-version="20.3.12" ngh="1" ng-server-context="ssg"><app-nav-bar _nghost-ng-c1030820267 ngh="0"><nav _ngcontent-ng-c1030820267><a _ngcontent-ng-c1030820267 routerlink routerlinkactive="active" href="/Programaci-n-y-Plataformas-Web-Clases/" class jsaction="click:;">Home</a><a _ngcontent-ng-c1030820267 routerlink="/perfil" routerlinkactive="active" href="/Programaci-n-y-Plataformas-Web-Clases/perfil" class="active" jsaction="click:;">Perfil</a><a _ngcontent-ng-c1030820267 routerlink="/proyectos" routerlinkactive="active" href="/Programaci-n-y-Plataformas-Web-Clases/proyectos" class jsaction="click:;">Proyectos</a><a _ngcontent-ng-c1030820267 routerlink="/proyectos-dos" routerlinkactive="active" href="/Programaci-n-y-Plataformas-Web-Clases/proyectos-dos" class jsaction="click:;">Proyectos Dos</a><a _ngcontent-ng-c1030820267 routerlink="/formularios/formulario" routerlinkactive="active" href="/Programaci-n-y-Plataformas-Web-Clases/formularios/formulario" class jsaction="click:;">Formulario Básico</a><a _ngcontent-ng-c1030820267 routerlink="/formularios/formulario-dinamico" routerlinkactive="active" href="/Programaci-n-y-Plataformas-Web-Clases/formularios/formulario-dinamico" class jsaction="click:;">Formulario Dinámico</a><a _ngcontent-ng-c1030820267 routerlink="/formularios/formulario-mas" routerlinkactive="active" href="/Programaci-n-y-Plataformas-Web-Clases/formularios/formulario-mas" class jsaction="click:;">Formulario Mas</a></nav></app-nav-bar><router-outlet></router-outlet><app-perfilpage ngh="0"><h1>Juan </h1><dl><dt>Nombre:</dt><dd>Juan </dd><dt>Apellido:</dt><dd>Fernandez</dd><dt>Edad:</dt><dd>24</dd><dt>Nombre Completo:</dt><dd>Juan  Fernandez con edad 24 años</dd><dt>Nombre y Apellido (Mayúsculas):</dt><dd>JUAN  FERNANDEZ</dd></dl><button jsaction="click:;"> Cambiar datos
+</button><button jsaction="click:;"> Cambiar edad a 18
+</button><button jsaction="click:;"> Reset
+</button></app-perfilpage><!----></app-root>
+<link rel="modulepreload" href="/Programaci-n-y-Plataformas-Web-Clases/chunk-L7CDKVRN.js"><script src="/Programaci-n-y-Plataformas-Web-Clases/main-I43EHNT7.js" type="module"></script>
+
+<script id="ng-state" type="application/json">{"__nghData__":[{},{"c":{"1":[{"i":"c3985389342","r":1}]}}]}</script></body></html>`;

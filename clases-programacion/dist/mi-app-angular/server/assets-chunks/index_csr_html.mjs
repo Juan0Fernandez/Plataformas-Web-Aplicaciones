@@ -1,0 +1,17 @@
+export default `<!doctype html>
+<html lang="en" data-beasties-container="">
+<head>
+  <meta charset="utf-8">
+  <title>MiAppAngular</title>
+  <base href="/Programaci-n-y-Plataformas-Web-Clases/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+
+<link rel="stylesheet" href="/Programaci-n-y-Plataformas-Web-Clases/styles-5INURTSO.css"></head>
+<body ngcm="">
+  <app-root></app-root>
+<link rel="modulepreload" href="/Programaci-n-y-Plataformas-Web-Clases/chunk-L7CDKVRN.js"><script src="/Programaci-n-y-Plataformas-Web-Clases/main-I43EHNT7.js" type="module"></script></body>
+</html>
+`;

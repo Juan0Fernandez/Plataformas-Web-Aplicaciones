@@ -1,0 +1,12 @@
+{
+  "routes": {
+    "/Programaci-n-y-Plataformas-Web-Clases": {},
+    "/Programaci-n-y-Plataformas-Web-Clases/formularios": {},
+    "/Programaci-n-y-Plataformas-Web-Clases/formularios/formulario": {},
+    "/Programaci-n-y-Plataformas-Web-Clases/formularios/formulario-dinamico": {},
+    "/Programaci-n-y-Plataformas-Web-Clases/formularios/formulario-mas": {},
+    "/Programaci-n-y-Plataformas-Web-Clases/perfil": {},
+    "/Programaci-n-y-Plataformas-Web-Clases/proyectos": {},
+    "/Programaci-n-y-Plataformas-Web-Clases/proyectos-dos": {}
+  }
+}
