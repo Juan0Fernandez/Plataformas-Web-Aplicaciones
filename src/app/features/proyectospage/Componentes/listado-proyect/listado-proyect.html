@@ -1,0 +1,12 @@
+<section>
+    <h2>{{ listaName() }}</h2>
+    
+    <ul class="lista-proyectos">
+        @for ( proyecto of proyectosList(); track $index) {
+            <li class="proyecto-item">
+                <strong>ID:</strong> {{ proyecto.id }} <br>
+                <strong>Nombre:</strong> {{ proyecto.nombre }} <br>
+                </li>
+        }
+    </ul>
+</section>

@@ -1,0 +1,18 @@
+<h1>Listado Proyectos desde Servicio</h1>
+
+<div>
+    <h3>Listado</h3>
+    <ul>
+      @for (proyecto of proyectos(); track $index) {
+        <li>{{ proyecto.nombre }} - {{ proyecto.descripcion }}</li>
+      }
+    </ul>
+  </div>
+
+
+<hr>
+<add-proyecto 
+(newProyecto)="proyectosService.addProyecto($event)"
+(removeProyecto)="proyectosService.removeFirstProyecto()" 
+>
+</add-proyecto>
