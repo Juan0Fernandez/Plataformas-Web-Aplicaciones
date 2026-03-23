@@ -1,0 +1,19 @@
+# robots.txt para PortafolioWeb
+# Este archivo indica a los motores de búsqueda qué páginas pueden indexar
+
+User-agent: *
+Allow: /
+Allow: /portfolio
+Allow: /portfolio/alexander
+Allow: /portfolio/juan
+Allow: /login
+Allow: /register
+
+# Bloquear áreas privadas
+Disallow: /admin
+Disallow: /user-dashboard
+Disallow: /programmer-dashboard
+Disallow: /profile
+
+# Sitemap
+Sitemap: https://portafolioweb.com/sitemap.xml

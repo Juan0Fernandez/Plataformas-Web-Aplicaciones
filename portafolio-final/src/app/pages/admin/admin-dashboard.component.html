@@ -1,0 +1,302 @@
+<app-navbar
+  [currentUser]="currentUser"
+  [additionalMenuItems]="navMenuItems"
+  [hideNavLinks]="true"
+  (logoutEvent)="logout()">
+</app-navbar>
+
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-24 pb-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-white mb-2">Panel de Administración</h1>
+      <p class="text-gray-300">Gestiona usuarios y programadores del sistema</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      <p class="text-white mt-4">Cargando usuarios...</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+        <div class="flex items-center">
+          <div class="p-3 bg-blue-600/20 rounded-lg">
+            <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-gray-400 text-sm">Total Usuarios</p>
+            <p class="text-2xl font-bold text-white">{{ allUsers.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+        <div class="flex items-center">
+          <div class="p-3 bg-purple-600/20 rounded-lg">
+            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-gray-400 text-sm">Programadores</p>
+            <p class="text-2xl font-bold text-white">{{ programmers.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+        <div class="flex items-center">
+          <div class="p-3 bg-green-600/20 rounded-lg">
+            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-gray-400 text-sm">Usuarios Activos</p>
+            <p class="text-2xl font-bold text-white">{{ allUsers.length }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Programmer Schedules Section -->
+    <div id="schedules" *ngIf="!loadingSchedules && programmers.length > 0" class="mb-8">
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl border border-white/10 overflow-hidden">
+        <div class="px-6 py-4 border-b border-white/10">
+          <h2 class="text-2xl font-bold text-white">⏰ Horarios de Programadores</h2>
+          <p class="text-gray-400 text-sm mt-1">Gestiona los horarios de disponibilidad</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <div *ngFor="let programmer of programmers" class="bg-slate-900/50 rounded-xl p-6 border border-white/10">
+            <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+              <div class="flex items-center gap-3">
+                <img
+                  [src]="programmer.photoURL || 'https://ui-avatars.com/api/?name=' + (programmer.displayName || programmer.email)"
+                  [alt]="programmer.displayName || 'Programador'"
+                  class="h-12 w-12 rounded-full border-2 border-purple-500/50 flex-shrink-0">
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-lg font-bold text-white">{{ programmer.displayName || 'Sin nombre' }}</h3>
+                  <p class="text-sm text-gray-400 break-all">{{ programmer.email }}</p>
+                </div>
+              </div>
+              <button
+                (click)="openScheduleModal(programmer.uid!)"
+                class="w-full sm:w-auto px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium whitespace-nowrap shrink-0">
+                + Agregar Horario
+              </button>
+            </div>
+
+            <div *ngIf="getProgrammerSchedules(programmer.uid!).length === 0" class="text-center py-8 border border-dashed border-white/20 rounded-lg">
+              <p class="text-gray-400">No tiene horarios configurados</p>
+            </div>
+
+            <div *ngIf="getProgrammerSchedules(programmer.uid!).length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div *ngFor="let schedule of getProgrammerSchedules(programmer.uid!)"
+                class="bg-slate-800/50 rounded-lg p-4 border border-white/10">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-white font-semibold text-sm">📅 {{ formatDateShort(schedule.date) }}</span>
+                  <span [class]="'px-2 py-1 rounded text-xs ' + (schedule.isActive ? 'bg-green-600/20 text-green-400' : 'bg-gray-600/20 text-gray-400')">
+                    {{ schedule.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+                <p class="text-gray-300 text-sm mb-3">🕐 {{ schedule.startTime }} - {{ schedule.endTime }}</p>
+                <div class="flex justify-end">
+                  <button
+                    (click)="deleteSchedule(schedule.id!)"
+                    class="px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600 hover:text-white transition text-sm font-medium">
+                    🗑️ Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Advisories Overview -->
+    <div *ngIf="!loadingAdvisories" class="mb-8">
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl border border-white/10 overflow-hidden">
+        <div class="px-6 py-4 border-b border-white/10">
+          <h2 class="text-2xl font-bold text-white">📋 Todas las Asesorías</h2>
+          <p class="text-gray-400 text-sm mt-1">Vista general de todas las solicitudes</p>
+        </div>
+
+        <div *ngIf="allAdvisories.length === 0" class="px-6 py-12 text-center">
+          <p class="text-gray-400">No hay solicitudes de asesoría</p>
+        </div>
+
+        <div *ngIf="allAdvisories.length > 0" class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div *ngFor="let advisory of allAdvisories.slice(0, 6)"
+              class="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white font-semibold text-sm">{{ advisory.userName }}</span>
+                <span [class]="'px-2 py-1 rounded text-xs bg-purple-600/20 text-purple-400'">
+                  {{ advisory.programmerName }}
+                </span>
+              </div>
+              <p class="text-gray-400 text-xs mb-2">{{ advisory.userEmail }}</p>
+              <p class="text-gray-300 text-sm">{{ advisory.time }}</p>
+            </div>
+          </div>
+          <div *ngIf="allAdvisories.length > 6" class="text-center mt-4">
+            <p class="text-gray-400 text-sm">Y {{ allAdvisories.length - 6 }} asesorías más...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div id="users" *ngIf="!loading" class="bg-slate-800/50 backdrop-blur-lg rounded-xl border border-white/10 overflow-hidden">
+      <div class="px-6 py-4 border-b border-white/10">
+        <h2 class="text-2xl font-bold text-white">Todos los Usuarios</h2>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-slate-900/50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Usuario</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rol</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/10">
+            <tr *ngFor="let user of allUsers" class="hover:bg-slate-700/30 transition">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img
+                    [src]="user.photoURL || 'https://ui-avatars.com/api/?name=' + (user.displayName || user.email)"
+                    [alt]="user.displayName || 'Usuario'"
+                    class="h-10 w-10 rounded-full border-2 border-purple-500/50">
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-white">{{ user.displayName || 'Sin nombre' }}</div>
+                    <div class="text-sm text-gray-400">{{ user.uid?.substring(0, 8) }}...</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-300">{{ user.email }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span [class]="'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white ' + getRoleBadgeColor(user.role)">
+                  {{ getRoleLabel(user.role) }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex gap-2">
+                  <select
+                    (change)="changeUserRole(user.uid!, $any($event.target).value)"
+                    [value]="user.role"
+                    class="bg-slate-700 text-white px-3 py-1 rounded border border-white/10 text-sm">
+                    <option [value]="UserRole.USER">Usuario</option>
+                    <option [value]="UserRole.PROGRAMMER">Programador</option>
+                    <option [value]="UserRole.ADMIN">Admin</option>
+                  </select>
+
+                  <button
+                    (click)="deleteUser(user.uid!)"
+                    class="px-3 py-1 bg-red-600/20 text-red-400 rounded hover:bg-red-600 hover:text-white transition">
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="allUsers.length === 0" class="px-6 py-12 text-center">
+        <p class="text-gray-400">No hay usuarios registrados</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal para crear horario -->
+<div *ngIf="showScheduleModal"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-slate-800 rounded-2xl max-w-lg w-full border border-white/10">
+    <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+      <h3 class="text-2xl font-bold text-white">Agregar Horario</h3>
+      <button (click)="closeScheduleModal()" class="text-gray-400 hover:text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-4">
+      <!-- Programador seleccionado -->
+      <div class="bg-purple-600/10 border border-purple-600/30 rounded-lg p-3">
+        <p class="text-sm text-purple-300">
+          <strong>Programador:</strong> {{ getProgrammerName(selectedProgrammerId) }}
+        </p>
+      </div>
+
+      <!-- Fecha -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Fecha del Horario</label>
+        <input
+          type="date"
+          [(ngModel)]="newSchedule.date"
+          [min]="getCurrentDate()"
+          class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none">
+      </div>
+
+      <!-- Hora de inicio -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Hora de Inicio</label>
+        <input
+          type="time"
+          [(ngModel)]="newSchedule.startTime"
+          class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none">
+      </div>
+
+      <!-- Hora de fin -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Hora de Fin</label>
+        <input
+          type="time"
+          [(ngModel)]="newSchedule.endTime"
+          class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none">
+      </div>
+
+      <!-- Estado -->
+      <div class="flex items-center gap-3">
+        <input
+          type="checkbox"
+          [(ngModel)]="newSchedule.isActive"
+          id="isActive"
+          class="w-5 h-5 rounded border-white/10 bg-slate-700 text-purple-600 focus:ring-purple-500">
+        <label for="isActive" class="text-sm text-gray-300">Horario activo</label>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 pt-4">
+        <button
+          (click)="createSchedule()"
+          class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold">
+          Crear Horario
+        </button>
+        <button
+          (click)="closeScheduleModal()"
+          class="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

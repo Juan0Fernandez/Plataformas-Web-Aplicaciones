@@ -1,0 +1,188 @@
+<nav class="bg-slate-900/95 backdrop-blur-md shadow-lg fixed w-full top-0 z-50 border-b border-purple-500/20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex items-center">
+        <a [routerLink]="['/portfolio']" class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition">PortafolioWeb</a>
+      </div>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex items-center space-x-8">
+        <!-- Navigation Links (ocultos en dashboards) -->
+        <ng-container *ngIf="!hideNavLinks">
+          <a *ngFor="let link of navLinks"
+             (click)="scrollToSection(link.sectionId)"
+             class="text-gray-300 hover:text-purple-400 cursor-pointer transition font-medium">
+            {{ link.label }}
+          </a>
+        </ng-container>
+
+        <!-- Notifications Bell -->
+        <div *ngIf="currentUser" class="relative notifications-menu-container">
+          <button (click)="toggleNotificationsMenu()" class="relative text-gray-300 hover:text-purple-400 focus:outline-none group">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <!-- Unread Count Badge -->
+            <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              {{ unreadCount > 9 ? '9+' : unreadCount }}
+            </span>
+          </button>
+
+          <!-- Notifications Dropdown -->
+          <div *ngIf="notificationsMenuOpen"
+               class="absolute right-0 mt-2 w-96 bg-slate-800 rounded-lg shadow-xl border border-purple-500/20 z-50 max-h-[500px] overflow-hidden flex flex-col">
+
+            <!-- Header -->
+            <div class="px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+              <h3 class="text-white font-semibold">Notificaciones</h3>
+              <button *ngIf="unreadCount > 0"
+                      (click)="markAllAsRead()"
+                      class="text-purple-400 text-xs hover:text-purple-300 transition">
+                Marcar todas como leídas
+              </button>
+            </div>
+
+            <!-- Notifications List -->
+            <div class="overflow-y-auto flex-1">
+              <div *ngIf="notifications.length === 0" class="px-4 py-8 text-center">
+                <p class="text-gray-400">No tienes notificaciones</p>
+              </div>
+
+              <div *ngFor="let notification of notifications"
+                   (click)="markAsRead(notification)"
+                   [class]="'px-4 py-3 border-b border-gray-700/50 hover:bg-slate-700/50 transition cursor-pointer ' + (!notification.read ? 'bg-slate-700/30' : '')">
+
+                <div class="flex items-start gap-3">
+                  <!-- Icon -->
+                  <div [class]="'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xl border ' + getNotificationColor(notification)">
+                    {{ getNotificationIcon(notification) }}
+                  </div>
+
+                  <!-- Content -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <h4 class="text-white text-sm font-semibold truncate">{{ notification.title }}</h4>
+                      <span *ngIf="!notification.read" class="flex-shrink-0 w-2 h-2 bg-purple-500 rounded-full ml-2"></span>
+                    </div>
+                    <p class="text-gray-300 text-xs line-clamp-2 mb-1">{{ notification.message }}</p>
+                    <span class="text-gray-500 text-xs">{{ getTimeAgo(notification.createdAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Menu Dropdown -->
+        <div *ngIf="currentUser; else loginButton" class="relative user-menu-container">
+          <button (click)="toggleUserMenu()" class="flex items-center space-x-2 focus:outline-none group">
+            <img
+              [src]="currentUser.photoURL || 'https://ui-avatars.com/api/?name=' + getUserInitials() + '&background=7c3aed&color=ffffff&size=128'"
+              [alt]="getUserDisplayName()"
+              class="w-10 h-10 rounded-full border-2 border-purple-500/50 object-cover group-hover:scale-110 group-hover:border-purple-400 transition-all"
+            >
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div *ngIf="userMenuOpen"
+               class="absolute right-0 mt-2 w-64 bg-slate-800 rounded-lg shadow-xl border border-purple-500/20 py-2 z-50">
+            <div class="px-4 py-3 border-b border-gray-700">
+              <div class="flex items-center space-x-3 mb-2">
+                <img
+                  [src]="currentUser.photoURL || 'https://ui-avatars.com/api/?name=' + getUserInitials() + '&background=7c3aed&color=ffffff&size=128'"
+                  [alt]="getUserDisplayName()"
+                  class="w-12 h-12 rounded-full border-2 border-purple-500/50 object-cover"
+                >
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold truncate">{{ getUserDisplayName() }}</p>
+                  <p class="text-gray-400 text-sm truncate">{{ getUserEmail() }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Menu Items -->
+            <div *ngFor="let item of additionalMenuItems">
+              <button (click)="item.action(); closeUserMenu()"
+                      class="w-full text-left px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-white transition flex items-center space-x-2">
+                <span [innerHTML]="item.icon" class="w-5 h-5"></span>
+                <span>{{ item.label }}</span>
+              </button>
+            </div>
+
+            <div *ngIf="additionalMenuItems.length > 0" class="border-t border-gray-700 my-1"></div>
+
+            <button (click)="logout()"
+                    class="w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700 transition flex items-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
+        </div>
+        <ng-template #loginButton>
+          <a [routerLink]="['/login']" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-md hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105">
+            Iniciar Sesión
+          </a>
+        </ng-template>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <div class="md:hidden flex items-center">
+        <button (click)="toggleMenu()" class="text-gray-300 hover:text-purple-400 focus:outline-none">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path *ngIf="!menuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            <path *ngIf="menuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div *ngIf="menuOpen" class="md:hidden">
+    <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-slate-900/95 backdrop-blur-md shadow-lg border-t border-purple-500/20">
+      <!-- Navigation Links (ocultos en dashboards) -->
+      <ng-container *ngIf="!hideNavLinks">
+        <a *ngFor="let link of navLinks"
+           (click)="scrollToSection(link.sectionId)"
+           class="block px-3 py-2 text-gray-300 hover:text-purple-400 hover:bg-slate-800 rounded-md cursor-pointer transition">
+          {{ link.label }}
+        </a>
+      </ng-container>
+
+      <!-- Mobile User Menu -->
+      <div *ngIf="currentUser; else mobileLogin" class="px-3 py-2">
+        <div class="bg-slate-800/50 rounded-lg p-4 mb-2">
+          <div class="flex items-center space-x-3 mb-3">
+            <img
+              [src]="currentUser.photoURL || 'https://ui-avatars.com/api/?name=' + getUserInitials() + '&background=7c3aed&color=ffffff&size=128'"
+              [alt]="getUserDisplayName()"
+              class="w-12 h-12 rounded-full border-2 border-purple-500/50 object-cover"
+            >
+            <div class="flex-1 min-w-0">
+              <p class="text-white font-semibold truncate">{{ getUserDisplayName() }}</p>
+              <p class="text-gray-400 text-sm truncate">{{ getUserEmail() }}</p>
+            </div>
+          </div>
+          <button (click)="logout()" class="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center justify-center space-x-2 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </div>
+      <ng-template #mobileLogin>
+        <div class="px-3 py-2">
+          <a [routerLink]="['/login']" class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-md text-center hover:from-purple-700 hover:to-pink-700">
+            Iniciar Sesión
+          </a>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</nav>
