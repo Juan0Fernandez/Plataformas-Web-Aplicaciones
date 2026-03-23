@@ -1,0 +1,464 @@
+<app-navbar
+  [currentUser]="currentUser"
+  [additionalMenuItems]="navMenuItems"
+  [hideNavLinks]="true"
+  (logoutEvent)="logout()">
+</app-navbar>
+
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-24 pb-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center flex-wrap gap-4">
+        <div>
+          <h1 class="text-4xl font-bold text-white mb-2">Mi Dashboard</h1>
+          <p class="text-gray-300">Gestiona tus proyectos académicos y profesionales</p>
+        </div>
+        <button
+          (click)="openAddProjectModal()"
+          class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition">
+          + Nuevo Proyecto
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      <p class="text-white mt-4">Cargando proyectos...</p>
+    </div>
+
+    <!-- Advisories Alert -->
+    <div *ngIf="pendingAdvisories.length > 0" class="mb-6">
+      <div class="bg-yellow-600/10 border border-yellow-600/50 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-yellow-400 font-medium">
+            Tienes {{ pendingAdvisories.length }} solicitud{{ pendingAdvisories.length !== 1 ? 'es' : '' }} de asesoría pendiente{{ pendingAdvisories.length !== 1 ? 's' : '' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+        <div class="flex items-center">
+          <div class="p-3 bg-purple-600/20 rounded-lg">
+            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-gray-400 text-sm">Total Proyectos</p>
+            <p class="text-2xl font-bold text-white">{{ projects.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+        <div class="flex items-center">
+          <div class="p-3 bg-blue-600/20 rounded-lg">
+            <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-gray-400 text-sm">Académicos</p>
+            <p class="text-2xl font-bold text-white">{{ academicProjects.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+        <div class="flex items-center">
+          <div class="p-3 bg-green-600/20 rounded-lg">
+            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-gray-400 text-sm">Profesionales</p>
+            <p class="text-2xl font-bold text-white">{{ professionalProjects.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+        <div class="flex items-center">
+          <div class="p-3 bg-yellow-600/20 rounded-lg">
+            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-gray-400 text-sm">Asesorías Pendientes</p>
+            <p class="text-2xl font-bold text-white">{{ pendingAdvisories.length }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advisories Section -->
+    <div *ngIf="!loadingAdvisories" class="mb-8">
+      <h2 class="text-2xl font-bold text-white mb-4">📅 Solicitudes de Asesoría</h2>
+
+      <div *ngIf="advisories.length === 0" class="bg-slate-800/30 rounded-xl border border-dashed border-white/20 p-12 text-center">
+        <p class="text-gray-400">No tienes solicitudes de asesoría</p>
+      </div>
+
+      <div *ngIf="advisories.length > 0" class="space-y-4">
+        <div *ngFor="let advisory of advisories"
+          class="bg-slate-800/50 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition">
+
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-lg font-bold text-white">{{ advisory.userName }}</h3>
+                <span [class]="'px-3 py-1 rounded-full text-xs border ' + getStatusBadgeClass(advisory.status)">
+                  {{ getStatusText(advisory.status) }}
+                </span>
+              </div>
+              <p class="text-gray-400 text-sm">{{ advisory.userEmail }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="flex items-center gap-2 text-gray-300">
+              <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <span class="text-sm">{{ formatDate(advisory.date) }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-300">
+              <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-sm">{{ advisory.time }}</span>
+            </div>
+          </div>
+
+          <div *ngIf="advisory.comment" class="mb-4 p-3 bg-slate-700/50 rounded-lg">
+            <p class="text-sm text-gray-300">{{ advisory.comment }}</p>
+          </div>
+
+          <div *ngIf="advisory.responseMessage" class="mb-4 p-3 bg-purple-600/10 border border-purple-600/30 rounded-lg">
+            <p class="text-sm text-purple-300"><strong>Respuesta:</strong> {{ advisory.responseMessage }}</p>
+          </div>
+
+          <div class="flex gap-2 flex-wrap">
+            <button *ngIf="advisory.status === AdvisoryStatus.PENDING"
+              (click)="selectAdvisory(advisory)"
+              class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm">
+              Gestionar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Academic Projects Section -->
+    <div *ngIf="!loading" class="mb-8">
+      <h2 class="text-2xl font-bold text-white mb-4">📚 Proyectos Académicos</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let project of academicProjects"
+          class="bg-slate-800/50 backdrop-blur-lg rounded-xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition group">
+          <div *ngIf="project.imageUrl" class="h-48 bg-slate-700 overflow-hidden">
+            <img [src]="project.imageUrl" [alt]="project.name" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-white mb-2">{{ project.name }}</h3>
+            <p class="text-gray-400 mb-4 line-clamp-2">{{ project.description }}</p>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span *ngFor="let tech of project.technologies"
+                class="px-2 py-1 bg-blue-600/20 text-blue-400 text-xs rounded">
+                {{ tech }}
+              </span>
+            </div>
+
+            <div class="flex gap-2">
+              <a *ngIf="project.demoUrl" [href]="project.demoUrl" target="_blank"
+                class="flex-1 px-4 py-2 bg-purple-600 text-white text-center rounded-lg hover:bg-purple-700 transition text-sm">
+                Ver Demo
+              </a>
+              <a *ngIf="project.repositoryUrl" [href]="project.repositoryUrl" target="_blank"
+                class="flex-1 px-4 py-2 bg-slate-700 text-white text-center rounded-lg hover:bg-slate-600 transition text-sm">
+                Código
+              </a>
+              <button (click)="deleteProject(project.id!)"
+                class="px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600 hover:text-white transition text-sm">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="academicProjects.length === 0"
+          class="col-span-full text-center py-12 bg-slate-800/30 rounded-xl border border-dashed border-white/20">
+          <p class="text-gray-400">No tienes proyectos académicos aún</p>
+          <button (click)="openAddProjectModal()" class="mt-4 text-purple-400 hover:text-purple-300">
+            + Agregar tu primer proyecto académico
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Professional Projects Section -->
+    <div *ngIf="!loading">
+      <h2 class="text-2xl font-bold text-white mb-4">💼 Proyectos Profesionales</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let project of professionalProjects"
+          class="bg-slate-800/50 backdrop-blur-lg rounded-xl overflow-hidden border border-white/10 hover:border-green-500/50 transition group">
+          <div *ngIf="project.imageUrl" class="h-48 bg-slate-700 overflow-hidden">
+            <img [src]="project.imageUrl" [alt]="project.name" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-white mb-2">{{ project.name }}</h3>
+            <p class="text-gray-400 mb-4 line-clamp-2">{{ project.description }}</p>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span *ngFor="let tech of project.technologies"
+                class="px-2 py-1 bg-green-600/20 text-green-400 text-xs rounded">
+                {{ tech }}
+              </span>
+            </div>
+
+            <div class="flex gap-2">
+              <a *ngIf="project.demoUrl" [href]="project.demoUrl" target="_blank"
+                class="flex-1 px-4 py-2 bg-green-600 text-white text-center rounded-lg hover:bg-green-700 transition text-sm">
+                Ver Demo
+              </a>
+              <a *ngIf="project.repositoryUrl" [href]="project.repositoryUrl" target="_blank"
+                class="flex-1 px-4 py-2 bg-slate-700 text-white text-center rounded-lg hover:bg-slate-600 transition text-sm">
+                Código
+              </a>
+              <button (click)="deleteProject(project.id!)"
+                class="px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600 hover:text-white transition text-sm">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="professionalProjects.length === 0"
+          class="col-span-full text-center py-12 bg-slate-800/30 rounded-xl border border-dashed border-white/20">
+          <p class="text-gray-400">No tienes proyectos profesionales aún</p>
+          <button (click)="openAddProjectModal()" class="mt-4 text-green-400 hover:text-green-300">
+            + Agregar tu primer proyecto profesional
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal para gestionar asesoría -->
+<div *ngIf="selectedAdvisory"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
+    <div class="sticky top-0 bg-slate-800 px-6 py-4 border-b border-white/10 flex justify-between items-center">
+      <h3 class="text-2xl font-bold text-white">Gestionar Asesoría</h3>
+      <button (click)="closeAdvisoryDetail()" class="text-gray-400 hover:text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <!-- User Info -->
+      <div class="bg-slate-700/50 rounded-xl p-4">
+        <h4 class="text-white font-semibold mb-3">Información del Usuario</h4>
+        <div class="space-y-2">
+          <p class="text-gray-300"><strong>Nombre:</strong> {{ selectedAdvisory.userName }}</p>
+          <p class="text-gray-300"><strong>Email:</strong> {{ selectedAdvisory.userEmail }}</p>
+        </div>
+      </div>
+
+      <!-- Advisory Details -->
+      <div class="bg-slate-700/50 rounded-xl p-4">
+        <h4 class="text-white font-semibold mb-3">Detalles de la Asesoría</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-gray-400 text-sm">Fecha</p>
+            <p class="text-white">{{ formatDate(selectedAdvisory.date) }}</p>
+          </div>
+          <div>
+            <p class="text-gray-400 text-sm">Hora</p>
+            <p class="text-white">{{ selectedAdvisory.time }}</p>
+          </div>
+        </div>
+        <div *ngIf="selectedAdvisory.comment" class="mt-4">
+          <p class="text-gray-400 text-sm mb-1">Comentario del usuario</p>
+          <p class="text-white">{{ selectedAdvisory.comment }}</p>
+        </div>
+      </div>
+
+      <!-- Response Message -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Mensaje de Respuesta (opcional)
+        </label>
+        <textarea
+          [(ngModel)]="responseMessage"
+          rows="4"
+          placeholder="Agrega un mensaje para el usuario..."
+          class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none resize-none"></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3">
+        <button (click)="approveAdvisory()"
+          class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+          ✓ Aprobar
+        </button>
+        <button (click)="rejectAdvisory()"
+          class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold">
+          ✗ Rechazar
+        </button>
+        <button (click)="closeAdvisoryDetail()"
+          class="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para agregar proyecto -->
+<div *ngIf="showAddProjectModal"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
+    <div class="sticky top-0 bg-slate-800 px-6 py-4 border-b border-white/10 flex justify-between items-center">
+      <h3 class="text-2xl font-bold text-white">Nuevo Proyecto</h3>
+      <button (click)="closeAddProjectModal()" class="text-gray-400 hover:text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-4">
+      <!-- Nombre -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Nombre del Proyecto *</label>
+        <input type="text" [(ngModel)]="newProject.name"
+          class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
+          placeholder="Ej: Sistema de Gestión Escolar">
+      </div>
+
+      <!-- Descripción -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Descripción *</label>
+        <textarea [(ngModel)]="newProject.description" rows="3"
+          class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none resize-none"
+          placeholder="Describe tu proyecto..."></textarea>
+      </div>
+
+      <!-- Tipo de Proyecto -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Tipo de Proyecto *</label>
+        <select [(ngModel)]="newProject.type"
+          class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none">
+          <option [value]="ProjectType.ACADEMIC">📚 Académico</option>
+          <option [value]="ProjectType.PROFESSIONAL">💼 Profesional</option>
+        </select>
+      </div>
+
+      <!-- Tipo de Participación -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Tipo de Participación *</label>
+        <div class="flex flex-wrap gap-2">
+          <button type="button"
+            (click)="toggleParticipationType(ParticipationType.FRONTEND)"
+            [class]="selectedParticipations.includes(ParticipationType.FRONTEND) ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-300'"
+            class="px-4 py-2 rounded-lg transition">
+            Frontend
+          </button>
+          <button type="button"
+            (click)="toggleParticipationType(ParticipationType.BACKEND)"
+            [class]="selectedParticipations.includes(ParticipationType.BACKEND) ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-300'"
+            class="px-4 py-2 rounded-lg transition">
+            Backend
+          </button>
+          <button type="button"
+            (click)="toggleParticipationType(ParticipationType.DATABASE)"
+            [class]="selectedParticipations.includes(ParticipationType.DATABASE) ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-300'"
+            class="px-4 py-2 rounded-lg transition">
+            Base de Datos
+          </button>
+          <button type="button"
+            (click)="toggleParticipationType(ParticipationType.FULLSTACK)"
+            [class]="selectedParticipations.includes(ParticipationType.FULLSTACK) ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-300'"
+            class="px-4 py-2 rounded-lg transition">
+            Fullstack
+          </button>
+        </div>
+      </div>
+
+      <!-- Tecnologías -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Tecnologías *</label>
+        <div class="flex gap-2 mb-2">
+          <input type="text" [(ngModel)]="techInput" (keyup.enter)="addTechnology()"
+            class="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
+            placeholder="Ej: Angular, TypeScript">
+          <button type="button" (click)="addTechnology()"
+            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+            Agregar
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let tech of newProject.technologies; let i = index"
+            class="px-3 py-1 bg-purple-600/20 text-purple-400 rounded-lg flex items-center gap-2">
+            {{ tech }}
+            <button type="button" (click)="removeTechnology(i)" class="text-purple-300 hover:text-white">×</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- URL del Repositorio -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">URL del Repositorio (GitHub, GitLab, etc.) *</label>
+        <input type="url" [(ngModel)]="newProject.repositoryUrl"
+          class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
+          placeholder="https://github.com/...">
+      </div>
+
+      <!-- URL del Demo -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">URL del Demo (Firebase, Vercel, etc.) *</label>
+        <input type="url" [(ngModel)]="newProject.demoUrl"
+          class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
+          placeholder="https://mi-proyecto.vercel.app">
+      </div>
+
+      <!-- URL de la Imagen -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">URL de la Imagen *</label>
+        <input type="url" [(ngModel)]="newProject.imageUrl"
+          class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
+          placeholder="https://...">
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 pt-4">
+        <button type="button" (click)="saveProject()"
+          class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold">
+          Guardar Proyecto
+        </button>
+        <button type="button" (click)="closeAddProjectModal()"
+          class="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

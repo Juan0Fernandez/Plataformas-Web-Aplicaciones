@@ -1,0 +1,143 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ====================
+    // FUNCIONES AUXILIARES
+    // ====================
+
+    // Verificar si el usuario está autenticado
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Verificar si el usuario es el dueño del documento
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Obtener el rol del usuario desde Firestore
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Verificar si el usuario es admin
+    function isAdmin() {
+      return isSignedIn() && getUserRole() == 'admin';
+    }
+
+    // Verificar si el usuario es programador
+    function isProgrammer() {
+      return isSignedIn() && getUserRole() == 'programmer';
+    }
+
+    // Verificar si el usuario es admin o programador
+    function isAdminOrProgrammer() {
+      return isAdmin() || isProgrammer();
+    }
+
+    // ====================
+    // REGLAS DE COLECCIONES
+    // ====================
+
+    // USUARIOS
+    match /users/{userId} {
+      // Cualquiera puede leer perfiles de usuario (para mostrar programadores)
+      allow read: if true;
+
+      // Solo el dueño puede crear su propio perfil (durante registro)
+      allow create: if isOwner(userId);
+
+      // Solo el dueño puede actualizar su perfil (excepto el campo 'role')
+      allow update: if isOwner(userId) &&
+                       (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+
+      // Solo admins pueden actualizar el rol de usuarios
+      allow update: if isAdmin() &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'updatedAt']);
+
+      // Solo admins pueden eliminar usuarios
+      allow delete: if isAdmin();
+    }
+
+    // HORARIOS (SCHEDULES)
+    match /schedules/{scheduleId} {
+      // Cualquiera puede leer horarios (para mostrar disponibilidad)
+      allow read: if true;
+
+      // Solo admins pueden crear horarios
+      allow create: if isAdmin();
+
+      // Solo admins pueden actualizar horarios
+      allow update: if isAdmin();
+
+      // Solo admins pueden eliminar horarios
+      allow delete: if isAdmin();
+    }
+
+    // ASESORÍAS (ADVISORIES)
+    match /advisories/{advisoryId} {
+      // Los usuarios pueden leer sus propias asesorías
+      // Los programadores pueden leer asesorías asignadas a ellos
+      // Los admins pueden leer todas
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.programmerId == request.auth.uid ||
+        isAdmin()
+      );
+
+      // Usuarios autenticados pueden crear asesorías
+      allow create: if isSignedIn() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Admins y programadores pueden actualizar asesorías (aprobar/rechazar)
+      allow update: if isAdminOrProgrammer();
+
+      // Solo admins pueden eliminar asesorías
+      allow delete: if isAdmin();
+    }
+
+    // NOTIFICACIONES
+    match /notifications/{notificationId} {
+      // Los usuarios solo pueden leer sus propias notificaciones
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      // Admins y programadores pueden crear notificaciones
+      allow create: if isAdminOrProgrammer();
+
+      // Los usuarios pueden actualizar sus propias notificaciones (marcar como leídas)
+      allow update: if isSignedIn() &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+
+      // Admins pueden actualizar cualquier notificación
+      allow update: if isAdmin();
+
+      // Solo admins pueden eliminar notificaciones
+      allow delete: if isAdmin();
+    }
+
+    // PROYECTOS
+    match /projects/{projectId} {
+      // Cualquiera puede leer proyectos (para mostrar en portafolios)
+      allow read: if true;
+
+      // Solo programadores pueden crear sus propios proyectos
+      allow create: if isProgrammer() &&
+                       request.resource.data.programmerId == request.auth.uid;
+
+      // Solo el dueño puede actualizar sus proyectos
+      allow update: if isSignedIn() && resource.data.programmerId == request.auth.uid;
+
+      // Solo el dueño o admins pueden eliminar proyectos
+      allow delete: if isAdmin() ||
+                       (isSignedIn() && resource.data.programmerId == request.auth.uid);
+    }
+
+    // Denegar acceso a cualquier otra colección no especificada
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

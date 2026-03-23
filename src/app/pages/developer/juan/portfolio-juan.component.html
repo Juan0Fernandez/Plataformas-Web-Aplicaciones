@@ -1,0 +1,25 @@
+<!-- Navbar -->
+<app-navbar
+  [currentUser]="currentUser"
+  [customNavLinks]="customNavLinks"
+  (logoutEvent)="logout()"
+  (scrollToEvent)="scrollToSection($event)">
+</app-navbar>
+
+<!-- Hero Section -->
+<app-hero-section
+  [developer]="developer"
+  (contactClick)="scrollToSection('contact')">
+</app-hero-section>
+
+<!-- Projects Section -->
+<app-projects-section [projects]="projects"></app-projects-section>
+
+<!-- Skills Section -->
+<app-skills-section [skills]="skills"></app-skills-section>
+
+<!-- Contact Section -->
+<app-contact-section [developer]="developer"></app-contact-section>
+
+<!-- Footer -->
+<app-footer></app-footer>

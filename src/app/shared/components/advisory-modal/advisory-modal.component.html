@@ -1,0 +1,165 @@
+<div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
+
+    <!-- Header -->
+    <div class="sticky top-0 bg-slate-800 px-6 py-4 border-b border-white/10 flex justify-between items-center">
+      <div>
+        <h2 class="text-2xl font-bold text-white">📅 Agendar Asesoría</h2>
+        <p class="text-gray-400 text-sm mt-1">Solicita una asesoría con nuestros programadores</p>
+      </div>
+      <button (click)="closeModal()" class="text-gray-400 hover:text-white transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <form [formGroup]="advisoryForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+
+      <!-- Success Mensaje -->
+      <div *ngIf="successMessage" class="bg-green-500/10 border border-green-500/50 rounded-lg p-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-sm text-green-400">{{ successMessage }}</p>
+        </div>
+      </div>
+
+      <!-- Error Mensaje -->
+      <div *ngIf="errorMessage" class="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-sm text-red-400">{{ errorMessage }}</p>
+        </div>
+      </div>
+
+      <!-- Seleccionar Programador -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Programador *
+        </label>
+        <select
+          formControlName="programmerId"
+          class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none transition">
+          <option value="">Selecciona un programador</option>
+          <option *ngFor="let programmer of programmers" [value]="programmer.uid">
+            {{ programmer.displayName || programmer.email }}
+          </option>
+        </select>
+        <p *ngIf="programmerId?.invalid && programmerId?.touched" class="text-red-400 text-sm mt-1">
+          Por favor selecciona un programador
+        </p>
+      </div>
+
+      <!-- Mensaje si no hay programador seleccionado -->
+      <div *ngIf="!programmerId?.value" class="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">
+        <p class="text-sm text-blue-400">👆 Primero selecciona un programador para ver sus horarios disponibles</p>
+      </div>
+
+      <!-- Fecha -->
+      <div *ngIf="programmerId?.value">
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Fecha *
+        </label>
+
+        <!-- Mensaje si no hay horarios -->
+        <div *ngIf="programmerSchedules.length === 0" class="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4 mb-2">
+          <p class="text-sm text-yellow-400">⚠️ Este programador no tiene horarios disponibles</p>
+        </div>
+
+        <!-- Selector de fecha -->
+        <select
+          *ngIf="programmerSchedules.length > 0"
+          formControlName="date"
+          class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none transition">
+          <option value="">Selecciona una fecha</option>
+          <option *ngFor="let schedule of programmerSchedules" [value]="convertToDate(schedule.date).toISOString().split('T')[0]">
+            {{ formatScheduleDate(schedule.date) }} ({{ schedule.startTime }} - {{ schedule.endTime }})
+          </option>
+        </select>
+        <p *ngIf="date?.invalid && date?.touched" class="text-red-400 text-sm mt-1">
+          Por favor selecciona una fecha
+        </p>
+      </div>
+
+      <!-- Hora -->
+      <div *ngIf="programmerId?.value && date?.value">
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Hora * <span class="text-xs text-gray-400">(Selecciona un horario disponible)</span>
+        </label>
+
+        <!-- Mensaje si no hay slots -->
+        <div *ngIf="availableTimeSlots.length === 0" class="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4 mb-2">
+          <p class="text-sm text-yellow-400">⚠️ No hay horarios disponibles para esta fecha</p>
+        </div>
+
+        <!-- Grid de horarios -->
+        <div *ngIf="availableTimeSlots.length > 0" class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+          <button
+            *ngFor="let slot of availableTimeSlots"
+            type="button"
+            (click)="slot.available && advisoryForm.patchValue({ time: slot.time })"
+            [disabled]="!slot.available"
+            [class.bg-purple-600]="time?.value === slot.time && slot.available"
+            [class.bg-slate-700]="time?.value !== slot.time && slot.available"
+            [class.bg-red-900/30]="!slot.available"
+            [class.cursor-not-allowed]="!slot.available"
+            [class.hover:bg-purple-600]="slot.available"
+            class="px-4 py-2 rounded-lg text-white transition text-sm relative">
+            {{ slot.time }}
+            <span *ngIf="!slot.available" class="absolute top-0 right-0 text-red-400 text-xs">✕</span>
+          </button>
+        </div>
+        <p *ngIf="time?.invalid && time?.touched" class="text-red-400 text-sm mt-1">
+          Por favor selecciona una hora
+        </p>
+        <p *ngIf="availableTimeSlots.length > 0" class="text-xs text-gray-400 mt-2">
+          <span class="inline-block w-3 h-3 bg-purple-600 rounded mr-1"></span> Disponible
+          <span class="inline-block w-3 h-3 bg-red-900/30 rounded ml-3 mr-1"></span> Ocupado
+        </p>
+      </div>
+
+      <!-- Comentario -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Comentario (opcional)
+        </label>
+        <textarea
+          formControlName="comment"
+          rows="4"
+          placeholder="Describe brevemente el motivo de tu asesoría..."
+          class="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none transition resize-none"></textarea>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 pt-4">
+        <button
+          type="submit"
+          [disabled]="loading || advisoryForm.invalid"
+          class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          <span *ngIf="!loading">Enviar Solicitud</span>
+          <span *ngIf="loading" class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Enviando...
+          </span>
+        </button>
+        <button
+          type="button"
+          (click)="closeModal()"
+          [disabled]="loading"
+          class="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition disabled:opacity-50">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
