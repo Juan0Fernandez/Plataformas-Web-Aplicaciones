@@ -1,0 +1,44 @@
+// reconocimiento-malo.component.ts
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-reconocimiento-malo',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="p-6 max-w-md mx-auto bg-white rounded shadow">
+      <h2 class="text-xl mb-4">Configurar Pizza</h2>
+      
+      <!-- El usuario debe recordar códigos -->
+      <form>
+        <div class="mb-4">
+          <label>Tamaño (S, M, L, XL):</label>
+          <input type="text" [(ngModel)]="size" name="size" class="w-full p-2 border rounded">
+        </div>
+        
+        <div class="mb-4">
+          <label>Masa (TH=Thin, TK=Thick, ST=Stuffed):</label>
+          <input type="text" [(ngModel)]="crust" name="crust" class="w-full p-2 border rounded">
+        </div>
+        
+        <div class="mb-4">
+          <label>Ingredientes (separados por comas):</label>
+          <textarea [(ngModel)]="toppings" name="toppings" 
+                   placeholder="Ej: pepperoni, mushrooms, olives..." 
+                   class="w-full p-2 border rounded h-20"></textarea>
+        </div>
+        
+        <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">
+          Ordenar Pizza
+        </button>
+      </form>
+    </div>
+  `
+})
+export class ReconocimientoMaloComponent {
+  size = '';
+  crust = '';
+  toppings = '';
+}
